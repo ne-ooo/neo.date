@@ -1,0 +1,70 @@
+{
+  "name": "@lpm.dev/neo.date",
+  "version": "1.0.0",
+  "description": "Zero-dependency date library - Tree-shakeable alternative to date-fns and moment.js",
+  "author": "neo",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist/index.js",
+    "dist/index.cjs",
+    "dist/index.d.ts",
+    "dist/index.d.cts",
+    ".lpm",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "bench": "vitest bench --run",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "date",
+    "time",
+    "datetime",
+    "formatting",
+    "parsing",
+    "manipulation",
+    "date-fns",
+    "moment",
+    "dayjs",
+    "luxon",
+    "tree-shakeable",
+    "zero-dependency",
+    "typescript",
+    "immutable"
+  ],
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "date-fns": "^4.1.0",
+    "dayjs": "^1.11.13",
+    "tsup": "^8.0.1",
+    "typescript": "^5.3.3",
+    "vitest": "^1.6.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ne-ooo/neo.date"
+  },
+  "bugs": {
+    "url": "https://github.com/ne-ooo/neo.date/issues"
+  },
+  "homepage": "https://github.com/ne-ooo/neo.date#readme"
+}
