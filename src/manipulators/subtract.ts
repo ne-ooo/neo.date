@@ -1,4 +1,5 @@
 import type { Duration } from '../types.js'
+import { normalizeDuration } from '../utils/duration.js'
 import { add } from './add.js'
 
 /**
@@ -20,15 +21,16 @@ import { add } from './add.js'
  * ```
  */
 export function subtract(date: Date, duration: Duration): Date {
-  const negated: Duration = {}
-
-  if (duration.years) negated.years = -duration.years
-  if (duration.months) negated.months = -duration.months
-  if (duration.days) negated.days = -duration.days
-  if (duration.hours) negated.hours = -duration.hours
-  if (duration.minutes) negated.minutes = -duration.minutes
-  if (duration.seconds) negated.seconds = -duration.seconds
-  if (duration.milliseconds) negated.milliseconds = -duration.milliseconds
+  const normalized = normalizeDuration(duration)
+  const negated: Duration = {
+    years: -normalized.years,
+    months: -normalized.months,
+    days: -normalized.days,
+    hours: -normalized.hours,
+    minutes: -normalized.minutes,
+    seconds: -normalized.seconds,
+    milliseconds: -normalized.milliseconds,
+  }
 
   return add(date, negated)
 }

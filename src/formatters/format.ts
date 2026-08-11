@@ -1,4 +1,6 @@
 import type { FormatOptions } from '../types.js'
+import { getValidDateTime } from '../utils/dateValidation.js'
+import { getDateTimeFormatter } from '../utils/intlFormatters.js'
 
 /**
  * Format date using Intl.DateTimeFormat
@@ -30,8 +32,9 @@ import type { FormatOptions } from '../types.js'
  * ```
  */
 export function format(date: Date, options: FormatOptions = {}): string {
+  const timestamp = getValidDateTime(date)
   const { locale = 'en-US', ...intlOptions } = options
 
-  const formatter = new Intl.DateTimeFormat(locale, intlOptions)
-  return formatter.format(date)
+  const formatter = getDateTimeFormatter(locale, intlOptions)
+  return formatter.format(timestamp)
 }

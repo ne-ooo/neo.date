@@ -11,6 +11,16 @@ export type TimeUnit =
   | 'millisecond'
 
 /**
+ * Time units supported by startOf() and endOf().
+ */
+export type BoundaryUnit = Exclude<TimeUnit, 'millisecond'>
+
+/**
+ * Plural time units accepted by diff().
+ */
+export type DifferenceUnit = `${TimeUnit}s`
+
+/**
  * Duration object for date manipulation
  */
 export interface Duration {
@@ -31,31 +41,11 @@ export interface Duration {
 }
 
 /**
- * Format options using Intl.DateTimeFormat
+ * All native Intl.DateTimeFormat options plus a locale selector.
  */
-export interface FormatOptions {
+export interface FormatOptions extends Intl.DateTimeFormatOptions {
   /** Locale string (e.g., 'en-US', 'fr-FR') */
   locale?: string
-  /** IANA timezone (e.g., 'America/New_York', 'Europe/London') */
-  timeZone?: string
-  /** Date formatting style */
-  dateStyle?: 'full' | 'long' | 'medium' | 'short'
-  /** Time formatting style */
-  timeStyle?: 'full' | 'long' | 'medium' | 'short'
-  /** Year format */
-  year?: 'numeric' | '2-digit'
-  /** Month format */
-  month?: 'numeric' | '2-digit' | 'long' | 'short' | 'narrow'
-  /** Day format */
-  day?: 'numeric' | '2-digit'
-  /** Hour format */
-  hour?: 'numeric' | '2-digit'
-  /** Minute format */
-  minute?: 'numeric' | '2-digit'
-  /** Second format */
-  second?: 'numeric' | '2-digit'
-  /** 12-hour clock */
-  hour12?: boolean
 }
 
 /**
@@ -66,6 +56,8 @@ export interface RelativeTimeOptions {
   locale?: string
   /** Formatting style */
   style?: 'long' | 'short' | 'narrow'
+  /** Use words such as "tomorrow" (`auto`) or numeric output (`always`) */
+  numeric?: 'always' | 'auto'
 }
 
 /**

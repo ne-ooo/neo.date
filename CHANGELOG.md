@@ -4,7 +4,24 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
-## [0.1.0] - 2026-03-09
+## [2.0.0] - 2026-08-03
+
+### Changed
+
+- `parseISO` now strictly validates ISO/RFC 3339 syntax and calendar values; date-only and zone-less inputs use local civil time.
+- `add` and `subtract` now clamp years/months, preserve local wall-clock time for days, use elapsed time for sub-day units, and reject unsafe durations.
+- `diff` now returns signed complete calendar units for years/months/days and truncates elapsed sub-day units toward zero.
+- All public date operations now reject invalid `Date` values consistently.
+- `formatRelative` now selects units by raw thresholds and defaults to numeric output.
+- `format` and `formatRelative` now reuse locale-aware formatters through small bounded LRU caches.
+- `FormatOptions` now supports the complete native `Intl.DateTimeFormatOptions` surface.
+- Added explicit `BoundaryUnit` and `DifferenceUnit` types for singular boundary operations and plural `diff` units.
+- Development tooling now uses patched Vitest and Vite versions with an LPM lockfile and a high-severity vulnerability gate for publishing.
+- CI now verifies supported Node.js versions, timezone-sensitive behavior, dependency security, and packed ESM/CJS consumers.
+- Package contents now include only publishable LPM skills, excluding local LPM install and audit state.
+- LPM publish/check scripts now build before packaging.
+
+## [1.0.0] - 2026-03-09
 
 ### Added
 

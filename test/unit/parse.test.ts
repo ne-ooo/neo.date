@@ -33,15 +33,13 @@ describe('parseISO', () => {
     it('should parse ISO string with timezone offset', () => {
       const result = parseISO('2025-01-15T15:30:00-05:00')
 
-      expect(result).toBeInstanceOf(Date)
-      expect(result.getFullYear()).toBe(2025)
+      expect(result.toISOString()).toBe('2025-01-15T20:30:00.000Z')
     })
 
     it('should parse ISO string with positive timezone offset', () => {
       const result = parseISO('2025-01-15T15:30:00+02:00')
 
-      expect(result).toBeInstanceOf(Date)
-      expect(result.getFullYear()).toBe(2025)
+      expect(result.toISOString()).toBe('2025-01-15T13:30:00.000Z')
     })
   })
 
@@ -56,6 +54,21 @@ describe('parseISO', () => {
 
     it('should throw error for empty string', () => {
       expect(() => parseISO('')).toThrow('Invalid ISO date string')
+    })
+
+    it('should reject invalid time and timezone components', () => {
+      expect(() => parseISO('2025-01-15T24:00:00Z')).toThrow()
+      expect(() => parseISO('2025-01-15T12:60:00Z')).toThrow()
+      expect(() => parseISO('2025-01-15T12:00:60Z')).toThrow()
+      expect(() => parseISO('2025-01-15T12:00:00+24:00')).toThrow()
+    })
+
+    it('should reject oversized input without reflecting it in the error', () => {
+      const input = '2'.repeat(1_000_000)
+
+      expect(() => parseISO(input)).toThrowError(
+        new RangeError('Invalid ISO date string')
+      )
     })
   })
 })

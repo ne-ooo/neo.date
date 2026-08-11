@@ -1,3 +1,5 @@
+import { getValidDateTime } from './dateValidation.js'
+
 /**
  * Compare two dates
  *
@@ -15,8 +17,10 @@
  * compare(date1, date1) // 0
  * ```
  */
-export function compare(dateLeft: Date, dateRight: Date): number {
-  const diff = dateLeft.getTime() - dateRight.getTime()
+export function compare(dateLeft: Date, dateRight: Date): -1 | 0 | 1 {
+  const diff =
+    getValidDateTime(dateLeft, 'dateLeft') -
+    getValidDateTime(dateRight, 'dateRight')
 
   if (diff < 0) return -1
   if (diff > 0) return 1

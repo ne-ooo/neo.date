@@ -16,6 +16,10 @@
  * // true
  * ```
  */
-export function isValid(date: Date): boolean {
-  return date instanceof Date && !isNaN(date.getTime())
+export function isValid(date: unknown): date is Date {
+  try {
+    return Number.isFinite(Date.prototype.getTime.call(date))
+  } catch {
+    return false
+  }
 }

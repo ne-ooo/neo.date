@@ -1,7 +1,7 @@
 ---
 name: getting-started
 description: How to import and use neo.date — formatters, parsers, manipulators, utilities, Duration type, FormatOptions, Intl-based formatting, and immutability guarantees
-version: "1.0.0"
+version: "2.0.0"
 globs:
   - "**/*.ts"
   - "**/*.js"
@@ -90,7 +90,7 @@ parseISO('not-a-date')                    // throws Error
 parseISO('')                              // throws Error
 ```
 
-Note: `parseISO` does not validate calendar correctness. `'2025-02-29'` returns March 1 (JS Date rolls forward) instead of throwing. See Anti-patterns for validation.
+`parseISO` validates its grammar and calendar values. Date-only and zone-less inputs use local civil time; `Z` and numeric offsets identify an absolute instant. Invalid values such as `'2025-02-29'` throw `RangeError`.
 
 ## Manipulators (Immutable)
 
@@ -109,7 +109,7 @@ subtract(date, { years: 1, months: 6 })
 
 Duration fields (all optional): `years`, `months`, `days`, `hours`, `minutes`, `seconds`, `milliseconds`.
 
-Operations apply sequentially: years → months → days → hours → minutes → seconds → ms. Month arithmetic uses native JS Date behavior (rolls forward on overflow, does not clamp).
+Years and months are combined into one calendar operation and clamp to the last valid target day. Days use local calendar arithmetic and preserve wall-clock time across DST. Hours and smaller units are exact elapsed durations. All duration values must be finite safe integers.
 
 ### startOf() and endOf()
 
@@ -141,7 +141,7 @@ diff(laterDate, earlierDate, 'milliseconds')  // 2592000000
 
 Units: `'years'`, `'months'`, `'days'`, `'hours'`, `'minutes'`, `'seconds'`, `'milliseconds'`.
 
-Returns signed values (negative if left < right). Time-based units are floored. Years/months use calendar subtraction.
+Returns signed values (negative if left < right). Years, months, and days count complete local-calendar units. Hours and smaller units are elapsed values truncated toward zero.
 
 ### Comparisons
 
@@ -170,8 +170,10 @@ import { formatISO, parseISO, diff } from '@lpm.dev/neo.date'
 import type {
   Duration,             // { years?, months?, days?, hours?, ... }
   TimeUnit,             // 'year' | 'month' | 'day' | ...
+  BoundaryUnit,         // singular units accepted by startOf/endOf
+  DifferenceUnit,       // plural units accepted by diff
   FormatOptions,        // Intl.DateTimeFormat options + locale
-  RelativeTimeOptions,  // { locale?, style? }
+  RelativeTimeOptions,  // { locale?, style?, numeric? }
   ISOFormatOptions,     // { representation? }
 } from '@lpm.dev/neo.date'
 ```

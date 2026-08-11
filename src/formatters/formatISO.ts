@@ -1,4 +1,5 @@
 import type { ISOFormatOptions } from '../types.js'
+import { getValidDateTime } from '../utils/dateValidation.js'
 
 /**
  * Format date as ISO 8601 string
@@ -23,9 +24,10 @@ export function formatISO(
   date: Date,
   options: ISOFormatOptions = {}
 ): string {
+  const timestamp = getValidDateTime(date)
   const { representation = 'complete' } = options
 
-  const iso = date.toISOString()
+  const iso = new Date(timestamp).toISOString()
 
   if (representation === 'date') {
     return iso.split('T')[0]!

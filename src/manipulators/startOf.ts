@@ -1,3 +1,6 @@
+import type { BoundaryUnit } from '../types.js'
+import { cloneValidDate, getValidDateTime } from '../utils/dateValidation.js'
+
 /**
  * Get start of time unit (immutable)
  *
@@ -7,23 +10,23 @@
  *
  * @example
  * ```ts
- * const date = new Date('2025-01-15T15:30:45.123Z')
+ * const date = new Date(2025, 0, 15, 15, 30, 45, 123)
  *
  * startOf(date, 'day')
- * // 2025-01-15T00:00:00.000Z
+ * // Jan 15, 2025 at 00:00:00.000 local time
  *
  * startOf(date, 'month')
- * // 2025-01-01T00:00:00.000Z
+ * // Jan 1, 2025 at 00:00:00.000 local time
  *
  * startOf(date, 'year')
- * // 2025-01-01T00:00:00.000Z
+ * // Jan 1, 2025 at 00:00:00.000 local time
  * ```
  */
 export function startOf(
   date: Date,
-  unit: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second'
+  unit: BoundaryUnit
 ): Date {
-  const result = new Date(date.getTime())
+  const result = cloneValidDate(date)
 
   switch (unit) {
     case 'year':
@@ -48,5 +51,6 @@ export function startOf(
       break
   }
 
+  getValidDateTime(result, 'result')
   return result
 }
