@@ -43,6 +43,7 @@ describe('format', () => {
         year: 'numeric',
         month: 'long',
         day: 'numeric',
+        timeZone: 'UTC',
       })
 
       expect(result).toContain('2025')
@@ -60,6 +61,19 @@ describe('format', () => {
       })
 
       expect(result).toContain('25')
+    })
+
+    it('should support the complete Intl option surface', () => {
+      const result = format(new Date('2025-01-15T15:30:00.000Z'), {
+        weekday: 'long',
+        era: 'short',
+        year: 'numeric',
+        calendar: 'gregory',
+        timeZone: 'UTC',
+      })
+
+      expect(result).toContain('Wednesday')
+      expect(result).toContain('2025')
     })
   })
 

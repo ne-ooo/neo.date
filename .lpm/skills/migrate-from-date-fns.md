@@ -1,7 +1,7 @@
 ---
 name: migrate-from-date-fns
-description: Step-by-step guide for migrating from date-fns to neo.date — format patterns to Intl options, clamping vs rolling, free locale support, missing features, and performance tradeoffs
-version: "1.0.0"
+description: Step-by-step guide for migrating from date-fns to neo.date — format patterns to Intl options, clamped calendar arithmetic, free locale support, missing features, and performance tradeoffs
+version: "2.0.0"
 globs:
   - "**/*.ts"
   - "**/*.js"
@@ -17,11 +17,11 @@ globs:
 | Bundle size | 40-80KB (tree-shaken) | ~6KB |
 | Format API | Pattern strings (`'yyyy-MM-dd'`) | Intl options object |
 | Parse API | Pattern + reference date | ISO strings only |
-| Month arithmetic | Clamps to last valid day | Rolls forward (native JS) |
+| Month arithmetic | Clamps to last valid day | Clamps to last valid day |
 | Locale support | Manual imports per locale | Free via `Intl` (all locales) |
-| `diff` (days) | 658K ops/s | 19.8M ops/s (30x faster) |
-| `parseISO` | 942K ops/s | 5.16M ops/s (5.5x faster) |
-| `format` | 970K ops/s | 31.5K ops/s (31x slower) |
+| `diff` (days) | Baseline | Faster in the included benchmark |
+| `parseISO` | Baseline | Faster in the included benchmark |
+| `format` | Baseline | Comparable; reuses a bounded native formatter cache |
 
 ## Step 1: Replace Imports
 
@@ -104,29 +104,17 @@ subtract(date, { days: 3 })
 add(date, { months: 1, days: 5, hours: 2 })
 ```
 
-### Critical: Month clamping behavior differs
+### Month clamping behavior
 
 ```typescript
 // date-fns — clamps to last valid day
 addMonths(new Date('2025-01-31'), 1)  // → Feb 28 (clamped)
 
-// neo.date — rolls forward (native JS behavior)
-add(new Date('2025-01-31'), { months: 1 })  // → Mar 3 (rolled)
+// neo.date — also clamps
+add(new Date(2025, 0, 31), { months: 1 })  // → Feb 28
 ```
 
-If your code relies on date-fns clamping, add a workaround:
-
-```typescript
-function addMonthsClamped(date: Date, months: number): Date {
-  const result = new Date(date.getTime())
-  const targetMonth = result.getMonth() + months
-  result.setMonth(targetMonth)
-  if (result.getMonth() !== ((targetMonth % 12) + 12) % 12) {
-    result.setDate(0)
-  }
-  return result
-}
-```
+No workaround is needed for end-of-month billing or scheduling behavior. Years are clamped the same way, so February 29 plus one year becomes February 28.
 
 ### startOf / endOf
 
@@ -193,7 +181,7 @@ parseISO('2025-03-15')  // Works
 |------------------|------------|
 | `eachDayOfInterval` | Loop with `add(date, { days: 1 })` |
 | `isWithinInterval` | `!isBefore(date, start) && !isAfter(date, end)` |
-| `closestTo` | `dates.sort((a, b) => Math.abs(diff(a, target, 'ms')) - Math.abs(diff(b, target, 'ms')))[0]` |
+| `closestTo` | `dates.sort((a, b) => Math.abs(diff(a, target, 'milliseconds')) - Math.abs(diff(b, target, 'milliseconds')))[0]` |
 | `intervalToDuration` | Multiple `diff()` calls per unit |
 | `getISOWeek` | `Math.ceil((diff(date, startOf(date, 'year'), 'days') + 1) / 7)` |
 | `format(date, pattern)` | Use `Intl.DateTimeFormat` options or `formatISO()` |
@@ -201,14 +189,7 @@ parseISO('2025-03-15')  // Works
 
 ## Performance Notes
 
-neo.date is significantly faster for parsing, diff, and comparisons (5-72x). But `format()` is 31x slower because `Intl.DateTimeFormat` is constructed per call.
-
-For hot paths formatting many dates, cache the formatter:
-
-```typescript
-const fmt = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' })
-const formatted = dates.map(d => fmt.format(d))
-```
+In the included benchmark, neo.date is faster for strict parsing, complete-day differences, and comparisons. `format()` and `formatRelative()` reuse small bounded native formatter caches, making repeated calls with the same locale/options competitive with the comparison libraries. Ratios are environment-dependent, so run `lpm run bench` on the deployment runtime when performance matters.
 
 ## Migration Checklist
 
@@ -220,6 +201,6 @@ const formatted = dates.map(d => fmt.format(d))
 - [ ] Replace `startOfDay/startOfMonth/...` with `startOf(date, unit)`
 - [ ] Replace `endOfDay/endOfMonth/...` with `endOf(date, unit)`
 - [ ] Replace locale imports with `locale: 'xx-XX'` option strings
-- [ ] Audit month arithmetic for clamping reliance — add workaround if needed
+- [ ] Confirm that clamped month/year arithmetic matches the intended schedule
 - [ ] Replace `formatDistance` with `formatRelative`
 - [ ] Remove `date-fns` from dependencies

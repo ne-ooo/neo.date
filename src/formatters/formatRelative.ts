@@ -1,4 +1,14 @@
 import type { RelativeTimeOptions } from '../types.js'
+import { getValidDateTime } from '../utils/dateValidation.js'
+import { getRelativeTimeFormatter } from '../utils/intlFormatters.js'
+
+const SECOND = 1_000
+const MINUTE = 60 * SECOND
+const HOUR = 60 * MINUTE
+const DAY = 24 * HOUR
+const WEEK = 7 * DAY
+const MONTH = 30 * DAY
+const YEAR = 365 * DAY
 
 /**
  * Format date as relative time ("2 hours ago", "in 3 days")
@@ -22,7 +32,8 @@ import type { RelativeTimeOptions } from '../types.js'
  *
  * formatRelative(twoHoursAgo, new Date(), {
  *   locale: 'es',
- *   style: 'long'
+ *   style: 'long',
+ *   numeric: 'always'
  * })
  * // 'hace 2 horas'
  * ```
@@ -32,39 +43,37 @@ export function formatRelative(
   baseDate: Date = new Date(),
   options: RelativeTimeOptions = {}
 ): string {
-  const { locale = 'en-US', style = 'long' } = options
+  const {
+    locale = 'en-US',
+    style = 'long',
+    numeric = 'always',
+  } = options
+  const diffMs =
+    getValidDateTime(date, 'date') - getValidDateTime(baseDate, 'baseDate')
+  const absoluteDifference = Math.abs(diffMs)
+  const rtf = getRelativeTimeFormatter(locale, { style, numeric })
 
-  const diffMs = date.getTime() - baseDate.getTime()
+  if (absoluteDifference < MINUTE) {
+    return rtf.format(roundSigned(diffMs / SECOND), 'second')
+  }
+  if (absoluteDifference < HOUR) {
+    return rtf.format(roundSigned(diffMs / MINUTE), 'minute')
+  }
+  if (absoluteDifference < DAY) {
+    return rtf.format(roundSigned(diffMs / HOUR), 'hour')
+  }
+  if (absoluteDifference < WEEK) {
+    return rtf.format(roundSigned(diffMs / DAY), 'day')
+  }
+  if (absoluteDifference < MONTH) {
+    return rtf.format(roundSigned(diffMs / WEEK), 'week')
+  }
+  if (absoluteDifference < YEAR) {
+    return rtf.format(roundSigned(diffMs / MONTH), 'month')
+  }
+  return rtf.format(roundSigned(diffMs / YEAR), 'year')
+}
 
-  // Calculate each unit independently from milliseconds
-  // Use Math.round() to handle both positive and negative differences correctly
-  const diffSeconds = Math.round(diffMs / 1000)
-  const diffMinutes = Math.round(diffMs / (1000 * 60))
-  const diffHours = Math.round(diffMs / (1000 * 60 * 60))
-  const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24))
-  const diffWeeks = Math.round(diffMs / (1000 * 60 * 60 * 24 * 7))
-  const diffMonths = Math.round(diffMs / (1000 * 60 * 60 * 24 * 30))
-  const diffYears = Math.round(diffMs / (1000 * 60 * 60 * 24 * 365))
-
-  const rtf = new Intl.RelativeTimeFormat(locale, { style, numeric: 'auto' })
-
-  if (Math.abs(diffYears) >= 1) {
-    return rtf.format(diffYears, 'year')
-  }
-  if (Math.abs(diffMonths) >= 1) {
-    return rtf.format(diffMonths, 'month')
-  }
-  if (Math.abs(diffWeeks) >= 1) {
-    return rtf.format(diffWeeks, 'week')
-  }
-  if (Math.abs(diffDays) >= 1) {
-    return rtf.format(diffDays, 'day')
-  }
-  if (Math.abs(diffHours) >= 1) {
-    return rtf.format(diffHours, 'hour')
-  }
-  if (Math.abs(diffMinutes) >= 1) {
-    return rtf.format(diffMinutes, 'minute')
-  }
-  return rtf.format(diffSeconds, 'second')
+function roundSigned(value: number): number {
+  return Math.sign(value) * Math.round(Math.abs(value))
 }

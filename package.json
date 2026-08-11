@@ -1,6 +1,6 @@
 {
   "name": "@lpm.dev/neo.date",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Zero-dependency date library - Tree-shakeable alternative to date-fns and moment.js",
   "author": "neo",
   "license": "MIT",
@@ -18,16 +18,23 @@
   "types": "./dist/index.d.ts",
   "files": [
     "dist/index.js",
+    "dist/index.js.map",
     "dist/index.cjs",
+    "dist/index.cjs.map",
     "dist/index.d.ts",
     "dist/index.d.cts",
-    ".lpm",
+    ".lpm/skills",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
     "build": "tsup",
+    "prepack": "lpm run build",
+    "security:audit": "lpm audit --level high --fail-on vuln",
+    "publish:check": "lpm run security:audit && lpm run test:package && lpm publish --check --yes",
+    "publish:lpm": "lpm run security:audit && lpm run test:package && lpm publish --yes",
     "test": "vitest run",
+    "test:package": "node test/package-smoke.mjs",
     "test:watch": "vitest",
     "bench": "vitest bench --run",
     "typecheck": "tsc --noEmit"
@@ -52,9 +59,10 @@
     "@types/node": "^20.11.0",
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
-    "tsup": "^8.0.1",
+    "tsup": "^8.5.1",
     "typescript": "^5.3.3",
-    "vitest": "^1.6.1"
+    "vite": "^6.4.3",
+    "vitest": "^3.2.6"
   },
   "engines": {
     "node": ">=18.0.0"

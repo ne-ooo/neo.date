@@ -10,8 +10,8 @@
  * - Tree-shakeable (import only what you need)
  * - TypeScript-first with strict types
  * - Uses native Intl APIs (DateTimeFormat, RelativeTimeFormat)
- * - Correct DST handling
- * - Native timezone support
+ * - Local calendar arithmetic with DST-safe elapsed sub-day durations
+ * - Native IANA timezone support for formatting
  *
  * @example
  * ```ts

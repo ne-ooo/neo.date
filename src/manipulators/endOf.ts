@@ -1,3 +1,7 @@
+import type { BoundaryUnit } from '../types.js'
+import { daysInMonth } from '../utils/calendar.js'
+import { cloneValidDate, getValidDateTime } from '../utils/dateValidation.js'
+
 /**
  * Get end of time unit (immutable)
  *
@@ -7,23 +11,23 @@
  *
  * @example
  * ```ts
- * const date = new Date('2025-01-15T15:30:45.123Z')
+ * const date = new Date(2025, 0, 15, 15, 30, 45, 123)
  *
  * endOf(date, 'day')
- * // 2025-01-15T23:59:59.999Z
+ * // Jan 15, 2025 at 23:59:59.999 local time
  *
  * endOf(date, 'month')
- * // 2025-01-31T23:59:59.999Z
+ * // Jan 31, 2025 at 23:59:59.999 local time
  *
  * endOf(date, 'year')
- * // 2025-12-31T23:59:59.999Z
+ * // Dec 31, 2025 at 23:59:59.999 local time
  * ```
  */
 export function endOf(
   date: Date,
-  unit: 'year' | 'month' | 'day' | 'hour' | 'minute' | 'second'
+  unit: BoundaryUnit
 ): Date {
-  const result = new Date(date.getTime())
+  const result = cloneValidDate(date)
 
   switch (unit) {
     case 'year':
@@ -31,13 +35,7 @@ export function endOf(
       result.setHours(23, 59, 59, 999)
       break
     case 'month': {
-      // Get last day of month
-      const nextMonth = new Date(
-        result.getFullYear(),
-        result.getMonth() + 1,
-        0
-      )
-      result.setDate(nextMonth.getDate())
+      result.setDate(daysInMonth(result.getFullYear(), result.getMonth()))
       result.setHours(23, 59, 59, 999)
       break
     }
@@ -55,5 +53,6 @@ export function endOf(
       break
   }
 
+  getValidDateTime(result, 'result')
   return result
 }

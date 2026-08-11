@@ -1,5 +1,10 @@
+import { add } from '../manipulators/add.js'
+import type { DifferenceUnit } from '../types.js'
+import { getValidDateTime } from './dateValidation.js'
+
 /**
- * Calculate difference between dates
+ * Calculate the signed number of complete units between dates.
+ * Calendar units use local civil time; sub-day units use elapsed time.
  *
  * @param dateLeft - Later date
  * @param dateRight - Earlier date
@@ -24,29 +29,105 @@
 export function diff(
   dateLeft: Date,
   dateRight: Date,
-  unit: 'years' | 'months' | 'days' | 'hours' | 'minutes' | 'seconds' | 'milliseconds'
+  unit: DifferenceUnit
 ): number {
-  const diffMs = dateLeft.getTime() - dateRight.getTime()
+  const leftTime = getValidDateTime(dateLeft, 'dateLeft')
+  const rightTime = getValidDateTime(dateRight, 'dateRight')
+  const diffMs = leftTime - rightTime
 
   switch (unit) {
     case 'years':
-      return dateLeft.getFullYear() - dateRight.getFullYear()
+      return differenceInCompleteCalendarUnits(
+        new Date(leftTime),
+        new Date(rightTime),
+        'years'
+      )
     case 'months':
-      return (
-        (dateLeft.getFullYear() - dateRight.getFullYear()) * 12 +
-        (dateLeft.getMonth() - dateRight.getMonth())
+      return differenceInCompleteCalendarUnits(
+        new Date(leftTime),
+        new Date(rightTime),
+        'months'
       )
     case 'days':
-      return Math.floor(diffMs / (1000 * 60 * 60 * 24))
+      return differenceInCompleteCalendarUnits(
+        new Date(leftTime),
+        new Date(rightTime),
+        'days'
+      )
     case 'hours':
-      return Math.floor(diffMs / (1000 * 60 * 60))
+      return truncateDifference(diffMs / 3_600_000)
     case 'minutes':
-      return Math.floor(diffMs / (1000 * 60))
+      return truncateDifference(diffMs / 60_000)
     case 'seconds':
-      return Math.floor(diffMs / 1000)
+      return truncateDifference(diffMs / 1_000)
     case 'milliseconds':
       return diffMs
     default:
       throw new Error(`Invalid unit: ${unit}`)
   }
+}
+
+function differenceInCompleteCalendarUnits(
+  dateLeft: Date,
+  dateRight: Date,
+  unit: 'years' | 'months' | 'days'
+): number {
+  const leftTime = dateLeft.getTime()
+  const rightTime = dateRight.getTime()
+
+  if (leftTime === rightTime) return 0
+
+  const sign = leftTime > rightTime ? 1 : -1
+  const later = sign === 1 ? dateLeft : dateRight
+  const earlier = sign === 1 ? dateRight : dateLeft
+  let estimate = estimateCalendarUnits(later, earlier, unit)
+  const candidate = addCalendarUnits(earlier, unit, estimate)
+
+  if (candidate.getTime() > later.getTime()) {
+    estimate -= 1
+  }
+
+  return estimate === 0 ? 0 : sign * estimate
+}
+
+function estimateCalendarUnits(
+  later: Date,
+  earlier: Date,
+  unit: 'years' | 'months' | 'days'
+): number {
+  if (unit === 'years') {
+    return later.getFullYear() - earlier.getFullYear()
+  }
+
+  if (unit === 'months') {
+    return (
+      (later.getFullYear() - earlier.getFullYear()) * 12 +
+      later.getMonth() -
+      earlier.getMonth()
+    )
+  }
+
+  return localDayNumber(later) - localDayNumber(earlier)
+}
+
+function addCalendarUnits(
+  date: Date,
+  unit: 'years' | 'months' | 'days',
+  amount: number
+): Date {
+  if (unit === 'years') return add(date, { years: amount })
+  if (unit === 'months') return add(date, { months: amount })
+  return add(date, { days: amount })
+}
+
+function localDayNumber(date: Date): number {
+  const utc = new Date(0)
+  utc.setUTCFullYear(date.getFullYear(), date.getMonth(), date.getDate())
+  utc.setUTCHours(0, 0, 0, 0)
+  return Math.trunc(utc.getTime() / 86_400_000)
+}
+
+function truncateDifference(value: number): number {
+  const truncated = Math.trunc(value)
+  return Object.is(truncated, -0) ? 0 : truncated
 }

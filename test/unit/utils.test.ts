@@ -41,6 +41,12 @@ describe('isValid', () => {
 
       expect(isValid(date)).toBe(false)
     })
+
+    it('should return false instead of throwing for non-Date values', () => {
+      expect(isValid(null)).toBe(false)
+      expect(isValid('2025-01-15')).toBe(false)
+      expect(isValid(Object.create(Date.prototype))).toBe(false)
+    })
   })
 })
 
@@ -100,8 +106,8 @@ describe('diff', () => {
 
   describe('days', () => {
     it('should calculate difference in days', () => {
-      const date1 = new Date('2025-01-15T00:00:00.000Z')
-      const date2 = new Date('2025-01-20T00:00:00.000Z')
+      const date1 = new Date(2025, 0, 15)
+      const date2 = new Date(2025, 0, 20)
 
       const result = diff(date2, date1, 'days')
 
@@ -109,8 +115,8 @@ describe('diff', () => {
     })
 
     it('should handle large day differences', () => {
-      const date1 = new Date('2025-01-01T00:00:00.000Z')
-      const date2 = new Date('2025-12-31T00:00:00.000Z')
+      const date1 = new Date(2025, 0, 1)
+      const date2 = new Date(2025, 11, 31)
 
       const result = diff(date2, date1, 'days')
 
@@ -120,8 +126,8 @@ describe('diff', () => {
 
   describe('months', () => {
     it('should calculate difference in months', () => {
-      const date1 = new Date('2025-01-15T00:00:00.000Z')
-      const date2 = new Date('2025-06-15T00:00:00.000Z')
+      const date1 = new Date(2025, 0, 15)
+      const date2 = new Date(2025, 5, 15)
 
       const result = diff(date2, date1, 'months')
 
@@ -129,8 +135,8 @@ describe('diff', () => {
     })
 
     it('should handle year boundaries', () => {
-      const date1 = new Date('2024-12-15T00:00:00.000Z')
-      const date2 = new Date('2025-03-15T00:00:00.000Z')
+      const date1 = new Date(2024, 11, 15)
+      const date2 = new Date(2025, 2, 15)
 
       const result = diff(date2, date1, 'months')
 
@@ -140,8 +146,8 @@ describe('diff', () => {
 
   describe('years', () => {
     it('should calculate difference in years', () => {
-      const date1 = new Date('2020-01-15T00:00:00.000Z')
-      const date2 = new Date('2025-01-15T00:00:00.000Z')
+      const date1 = new Date(2020, 0, 15)
+      const date2 = new Date(2025, 0, 15)
 
       const result = diff(date2, date1, 'years')
 
