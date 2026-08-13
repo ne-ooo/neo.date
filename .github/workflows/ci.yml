@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  LPM_VERSION: "0.71.0"
+  LPM_VERSION: "0.74.1"
 
 jobs:
   node:
@@ -105,6 +105,9 @@ jobs:
 
       - name: Audit dependencies
         run: npm run security:audit
+
+      - name: Verify dependency signatures
+        run: lpm audit signatures --json
 
       - name: Smoke-test packed ESM and CJS consumers
         run: npm run test:package

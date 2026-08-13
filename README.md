@@ -78,7 +78,7 @@ format(new Date(), { timeStyle: 'short', timeZone: 'America/New_York' })
 **Options** (`FormatOptions`):
 | Option | Type | Description |
 |--------|------|-------------|
-| `locale` | `string` | BCP 47 locale tag (default: `'en-US'`) |
+| `locale` | `string` | BCP 47 locale tag, up to 256 characters (default: `'en-US'`) |
 | `timeZone` | `string` | IANA timezone (e.g. `'America/New_York'`) |
 | `dateStyle` | `'full' \| 'long' \| 'medium' \| 'short'` | Preset date format |
 | `timeStyle` | `'full' \| 'long' \| 'medium' \| 'short'` | Preset time format |
@@ -141,7 +141,7 @@ formatRelative(twoHoursAgo, new Date(), { style: 'short' })
 |-----------|------|---------|-------------|
 | `date` | `Date` | — | Date to format |
 | `baseDate` | `Date` | `new Date()` | Reference date (defaults to now) |
-| `options.locale` | `string` | `'en-US'` | BCP 47 locale tag |
+| `options.locale` | `string` | `'en-US'` | BCP 47 locale tag, up to 256 characters |
 | `options.style` | `'long' \| 'short' \| 'narrow'` | `'long'` | Output verbosity |
 | `options.numeric` | `'always' \| 'auto'` | `'always'` | Numeric output or words such as `tomorrow` |
 

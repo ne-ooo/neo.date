@@ -146,6 +146,10 @@ describe('neo.date vs date-fns vs dayjs - Performance Comparison', () => {
     bench('dayjs - diff days', () => {
       dayjs(date2).diff(dayjs(date1), 'day')
     })
+
+    bench('neo.date - diff elapsed hours', () => {
+      diff(date2, date1, 'hours')
+    })
   })
 
   describe('Date Comparison', () => {

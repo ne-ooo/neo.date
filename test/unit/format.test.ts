@@ -103,6 +103,12 @@ describe('format', () => {
       expect(typeof result).toBe('string')
       expect(result.length).toBeGreaterThan(0)
     })
+
+    it('rejects oversized locales', () => {
+      const locale = `en-x-${'a-'.repeat(126)}a`
+
+      expect(() => format(new Date(), { locale })).toThrow(RangeError)
+    })
   })
 })
 
@@ -147,6 +153,14 @@ describe('formatISO', () => {
 })
 
 describe('formatRelative', () => {
+  it('rejects oversized locales', () => {
+    const locale = `en-x-${'a-'.repeat(126)}a`
+
+    expect(() =>
+      formatRelative(new Date(), new Date(), { locale })
+    ).toThrow(RangeError)
+  })
+
   describe('past times', () => {
     it('should format seconds ago', () => {
       const now = new Date()
