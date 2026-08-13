@@ -1,5 +1,6 @@
 const FORMATTER_CACHE_LIMIT = 32
 const MAX_CACHE_KEY_LENGTH = 512
+const MAX_LOCALE_LENGTH = 256
 
 const DATE_TIME_OPTION_KEYS = [
   'localeMatcher',
@@ -77,8 +78,10 @@ export function clearIntlFormatterCaches(): void {
 }
 
 function getCanonicalLocale(locale: string): string {
-  if (locale.length > MAX_CACHE_KEY_LENGTH) {
-    return canonicalizeLocale(locale)
+  if (typeof locale !== 'string' || locale.length > MAX_LOCALE_LENGTH) {
+    throw new RangeError(
+      `locale must be a string no longer than ${MAX_LOCALE_LENGTH} characters`
+    )
   }
 
   return getOrCreate(canonicalLocales, locale, () => canonicalizeLocale(locale))

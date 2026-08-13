@@ -1,5 +1,5 @@
 [metadata]
-lockfile-version = 7
+lockfile-version = 10
 resolved-with = "greedy-fusion"
 
 [importers."."]
@@ -2516,3 +2516,38 @@ tarball = "https://registry.npmjs.org/why-is-node-running/-/why-is-node-running-
 [[packages.registry-signatures]]
 keyid = "SHA256:jl3bwswu80PjjokCgh0o2w5c2U4LhQAE57gj9cz1kzA"
 sig = "MEUCIQCmXkHBlr2EaYbr5TecVbZwcvzWMAPBQYYZLY47dMs0fwIgdHCXSE696PkpcshWS6pCbDvHkuv3bCLVomrhVX0szS0="
+
+[root-resolutions."@types/node"]
+package = "@types/node"
+version = "20.19.43"
+source = "registry+https://registry.npmjs.org"
+
+[root-resolutions.date-fns]
+package = "date-fns"
+version = "4.4.0"
+source = "registry+https://registry.npmjs.org"
+
+[root-resolutions.dayjs]
+package = "dayjs"
+version = "1.11.21"
+source = "registry+https://registry.npmjs.org"
+
+[root-resolutions.tsup]
+package = "tsup"
+version = "8.5.1"
+source = "registry+https://registry.npmjs.org"
+
+[root-resolutions.typescript]
+package = "typescript"
+version = "5.9.3"
+source = "registry+https://registry.npmjs.org"
+
+[root-resolutions.vite]
+package = "vite"
+version = "6.4.3"
+source = "registry+https://registry.npmjs.org"
+
+[root-resolutions.vitest]
+package = "vitest"
+version = "3.2.7"
+source = "registry+https://registry.npmjs.org"

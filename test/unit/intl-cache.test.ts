@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   clearIntlFormatterCaches,
   getDateTimeFormatter,
@@ -8,6 +8,7 @@ import {
 describe('Intl formatter caches', () => {
   afterEach(() => {
     clearIntlFormatterCaches()
+    vi.restoreAllMocks()
   })
 
   it('reuses equivalent date-time formatters', () => {
@@ -50,23 +51,17 @@ describe('Intl formatter caches', () => {
     ).not.toBe(first)
   })
 
-  it('does not retain oversized user-controlled cache keys', () => {
-    const locale =
-      'en-US-x-' +
-      Array.from({ length: 70 }, (_, index) =>
-        `cache${index}`.padEnd(8, 'x')
-      ).join('-')
+  it('rejects oversized locales before canonicalization', () => {
+    const oversizedLocale = `en-x-${'a-'.repeat(126)}a`
+    const canonicalize = vi.spyOn(Intl, 'getCanonicalLocales')
 
-    try {
-      const first = getDateTimeFormatter(locale, { timeZone: 'UTC' })
-      const second = getDateTimeFormatter(locale, { timeZone: 'UTC' })
-
-      expect(second).not.toBe(first)
-    } catch (error) {
-      // Older ICU versions reject very long private-use locale tags. Rejected
-      // keys are never inserted, which is also a safe outcome.
-      expect(error).toBeInstanceOf(RangeError)
-    }
+    expect(() =>
+      getDateTimeFormatter(oversizedLocale, { timeZone: 'UTC' })
+    ).toThrow(RangeError)
+    expect(() => getRelativeTimeFormatter(oversizedLocale, {})).toThrow(
+      RangeError
+    )
+    expect(canonicalize).not.toHaveBeenCalled()
   })
 
   it('does not reuse an implicit-zone formatter after TZ changes', () => {

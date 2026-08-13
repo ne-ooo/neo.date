@@ -121,10 +121,25 @@ function addCalendarUnits(
 }
 
 function localDayNumber(date: Date): number {
-  const utc = new Date(0)
-  utc.setUTCFullYear(date.getFullYear(), date.getMonth(), date.getDate())
-  utc.setUTCHours(0, 0, 0, 0)
-  return Math.trunc(utc.getTime() / 86_400_000)
+  let year = date.getFullYear()
+  const month = date.getMonth() + 1
+
+  // Map the local civil date to a proleptic-Gregorian day number without
+  // allocating another Date. March is month zero so leap days end each year.
+  if (month <= 2) year -= 1
+  const era = Math.floor(year / 400)
+  const yearOfEra = year - era * 400
+  const marchBasedMonth = month + (month > 2 ? -3 : 9)
+  const dayOfYear =
+    Math.floor((153 * marchBasedMonth + 2) / 5) + date.getDate() - 1
+  const dayOfEra =
+    yearOfEra * 365 +
+    Math.floor(yearOfEra / 4) -
+    Math.floor(yearOfEra / 100) +
+    dayOfYear
+
+  // 719468 maps the algorithm's 0000-03-01 origin to 1970-01-01.
+  return era * 146_097 + dayOfEra - 719_468
 }
 
 function truncateDifference(value: number): number {

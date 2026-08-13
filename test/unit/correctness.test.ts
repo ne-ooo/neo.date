@@ -117,6 +117,23 @@ describe('signed complete-unit differences', () => {
     expect(diff(earlier, later, 'days')).toBe(-1)
   })
 
+  it('counts civil days across leap and negative-year boundaries', () => {
+    const yearZero = new Date(0)
+    yearZero.setFullYear(0, 1, 28)
+    yearZero.setHours(12, 0, 0, 0)
+    const leapDay = new Date(yearZero)
+    leapDay.setDate(leapDay.getDate() + 1)
+
+    const negativeYear = new Date(0)
+    negativeYear.setFullYear(-1, 11, 31)
+    negativeYear.setHours(12, 0, 0, 0)
+    const nextDay = new Date(negativeYear)
+    nextDay.setDate(nextDay.getDate() + 1)
+
+    expect(diff(leapDay, yearZero, 'days')).toBe(1)
+    expect(diff(nextDay, negativeYear, 'days')).toBe(1)
+  })
+
   it('is antisymmetric for every unit, including month-end dates', () => {
     const left = new Date(2024, 1, 29, 12, 30)
     const right = new Date(2025, 2, 31, 10, 15)

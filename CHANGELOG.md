@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased]
+
+### Security
+
+- Reject locale identifiers longer than 256 characters before `Intl` canonicalization to prevent event-loop CPU exhaustion from attacker-controlled input.
+
+### Performance
+
+- Calculate local civil day numbers without temporary `Date` allocations when computing day differences.
+
+### Changed
+
+- Updated the pinned LPM CI toolchain and lockfile schema, and added dependency-signature verification to the package security job.
+
 ## [2.0.0] - 2026-08-03
 
 ### Changed
