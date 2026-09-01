@@ -1,295 +1,331 @@
 # @lpm.dev/neo.date
 
-> Zero-dependency date library — tree-shakeable, TypeScript-first alternative to date-fns and moment.js
-
-Uses **native Intl APIs** (no custom parsers, no locale data to ship) — giving you accurate locale-aware formatting with zero bundle cost.
+`@lpm.dev/neo.date` formats, parses, compares, and changes dates in Node.js and
+modern browsers.
 
 ## Features
 
-- ✅ **Zero dependencies** — No external runtime dependencies
-- ✅ **Tree-shakeable** — Import only what you need (~300 bytes per function)
-- ✅ **TypeScript-first** — Strict types, full IntelliSense
-- ✅ **Immutable** — All operations return new `Date` objects
-- ✅ **Native Intl** — Locale-aware formatting via `Intl.DateTimeFormat` and `Intl.RelativeTimeFormat`
-- ✅ **Timezone-aware formatting** — IANA timezone names supported by `format()`
-- ✅ **DST-safe arithmetic** — calendar days use local civil time; sub-day units use elapsed time
-- ✅ **ESM + CJS** — Works in Node.js 18+ and modern browsers
+- **Formatting:** Uses `Intl.DateTimeFormat` and `Intl.RelativeTimeFormat` for
+  locale-aware output.
+- **Date operations:** Adds, subtracts, compares, and finds boundaries without
+  changing the input date.
+- **Time zones:** Supports IANA time-zone names in `format()`.
+- **Calendar arithmetic:** Uses local civil time for calendar units and elapsed
+  time for smaller units.
+- **TypeScript support:** Includes strict type declarations.
+- **Dependency surface:** Has no runtime dependencies.
 
 ## Install
+
+Install the package with LPM:
 
 ```bash
 lpm install @lpm.dev/neo.date
 ```
 
-## Usage
+## Quick start
 
 ```typescript
-import { format, add, diff, formatRelative } from '@lpm.dev/neo.date'
+import { add, diff, format, formatRelative } from "@lpm.dev/neo.date";
 
 // Format a date
-format(new Date(), { dateStyle: 'medium' })
-// => 'Jan 15, 2025'
+format(new Date(), { dateStyle: "medium" });
+// => "Jan 15, 2025"
 
 // Add duration (immutable)
-const tomorrow = add(new Date(), { days: 1 })
+const tomorrow = add(new Date(), { days: 1 });
 
 // Difference between dates
-diff(tomorrow, new Date(), 'days')
+diff(tomorrow, new Date(), "days");
 // => 1
 
 // Relative time
-formatRelative(new Date(Date.now() - 2 * 60 * 60 * 1000))
-// => '2 hours ago'
+formatRelative(new Date(Date.now() - 2 * 60 * 60 * 1000));
+// => "2 hours ago"
 ```
 
 ## API
 
 ### `format(date, options?)`
 
-Format a date using `Intl.DateTimeFormat`. Locale-aware, timezone-aware, zero bundle cost.
+Formats a date with `Intl.DateTimeFormat`.
 
 ```typescript
-import { format } from '@lpm.dev/neo.date'
+import { format } from "@lpm.dev/neo.date";
 
 // Preset styles
-format(new Date(), { dateStyle: 'medium' })               // 'Jan 15, 2025'
-format(new Date(), { dateStyle: 'full' })                 // 'Wednesday, January 15, 2025'
-format(new Date(), { timeStyle: 'short' })                // '3:45 PM'
-format(new Date(), { dateStyle: 'short', timeStyle: 'short' }) // '1/15/25, 3:45 PM'
+format(new Date(), { dateStyle: "medium" }); // "Jan 15, 2025"
+format(new Date(), { dateStyle: "full" }); // "Wednesday, January 15, 2025"
+format(new Date(), { timeStyle: "short" }); // "3:45 PM"
+format(new Date(), { dateStyle: "short", timeStyle: "short" }); // "1/15/25, 3:45 PM"
 
 // Component-level control
-format(new Date(), { year: 'numeric', month: 'long', day: 'numeric' })
-// 'January 15, 2025'
+format(new Date(), { year: "numeric", month: "long", day: "numeric" });
+// "January 15, 2025"
 
 // Any native Intl.DateTimeFormat option
-format(new Date(), { weekday: 'long', era: 'short', calendar: 'gregory' })
+format(new Date(), { weekday: "long", era: "short", calendar: "gregory" });
 
 // Locale
-format(new Date(), { dateStyle: 'long', locale: 'fr-FR' })
-// '15 janvier 2025'
+format(new Date(), { dateStyle: "long", locale: "fr-FR" });
+// "15 janvier 2025"
 
 // Timezone
-format(new Date(), { timeStyle: 'short', timeZone: 'America/New_York' })
-// '10:45 AM'
+format(new Date(), { timeStyle: "short", timeZone: "America/New_York" });
+// "10:45 AM"
 ```
 
-`FormatOptions` extends `Intl.DateTimeFormatOptions`, so every formatting option supported by the current JavaScript runtime is accepted. Common options include:
+`FormatOptions` extends `Intl.DateTimeFormatOptions`, so every formatting option
+supported by the current JavaScript runtime is accepted. Common options include:
 
 **Options** (`FormatOptions`):
-| Option | Type | Description |
-|--------|------|-------------|
-| `locale` | `string` | BCP 47 locale tag, up to 256 characters (default: `'en-US'`) |
-| `timeZone` | `string` | IANA timezone (e.g. `'America/New_York'`) |
-| `dateStyle` | `'full' \| 'long' \| 'medium' \| 'short'` | Preset date format |
-| `timeStyle` | `'full' \| 'long' \| 'medium' \| 'short'` | Preset time format |
-| `year` | `'numeric' \| '2-digit'` | Year component |
-| `month` | `'numeric' \| '2-digit' \| 'long' \| 'short' \| 'narrow'` | Month component |
-| `day` | `'numeric' \| '2-digit'` | Day component |
-| `hour` | `'numeric' \| '2-digit'` | Hour component |
-| `minute` | `'numeric' \| '2-digit'` | Minute component |
-| `second` | `'numeric' \| '2-digit'` | Second component |
-| `hour12` | `boolean` | 12-hour clock |
+
+| Option      | Type                                                      | Description                                                  |
+| ----------- | --------------------------------------------------------- | ------------------------------------------------------------ |
+| `locale`    | `string`                                                  | BCP 47 locale tag, up to 256 characters (default: `'en-US'`) |
+| `timeZone`  | `string`                                                  | IANA time zone, for example, `"America/New_York"`            |
+| `dateStyle` | `'full' \| 'long' \| 'medium' \| 'short'`                 | Preset date format                                           |
+| `timeStyle` | `'full' \| 'long' \| 'medium' \| 'short'`                 | Preset time format                                           |
+| `year`      | `'numeric' \| '2-digit'`                                  | Year component                                               |
+| `month`     | `'numeric' \| '2-digit' \| 'long' \| 'short' \| 'narrow'` | Month component                                              |
+| `day`       | `'numeric' \| '2-digit'`                                  | Day component                                                |
+| `hour`      | `'numeric' \| '2-digit'`                                  | Hour component                                               |
+| `minute`    | `'numeric' \| '2-digit'`                                  | Minute component                                             |
+| `second`    | `'numeric' \| '2-digit'`                                  | Second component                                             |
+| `hour12`    | `boolean`                                                 | 12-hour clock                                                |
 
 ### `formatISO(date, options?)`
 
-Format a date as ISO 8601 / RFC 3339.
+Formats a date as ISO 8601 or RFC 3339.
 
 ```typescript
-import { formatISO } from '@lpm.dev/neo.date'
+import { formatISO } from "@lpm.dev/neo.date";
 
-formatISO(new Date('2025-01-15T15:30:00Z'))
-// => '2025-01-15T15:30:00.000Z'
+formatISO(new Date("2025-01-15T15:30:00Z"));
+// => "2025-01-15T15:30:00.000Z"
 
-formatISO(new Date(), { representation: 'date' })
-// => '2025-01-15'
+formatISO(new Date(), { representation: "date" });
+// => "2025-01-15"
 
-formatISO(new Date(), { representation: 'time' })
-// => '15:30:00.000Z'
+formatISO(new Date(), { representation: "time" });
+// => "15:30:00.000Z"
 ```
 
 **Options** (`ISOFormatOptions`):
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
+
+| Option           | Type                             | Default      | Description               |
+| ---------------- | -------------------------------- | ------------ | ------------------------- |
 | `representation` | `'complete' \| 'date' \| 'time'` | `'complete'` | What to include in output |
 
 ### `formatRelative(date, baseDate?, options?)`
 
-Format a date as a human-readable relative time string using `Intl.RelativeTimeFormat`.
+Formats a date as relative time with `Intl.RelativeTimeFormat`.
 
 ```typescript
-import { formatRelative } from '@lpm.dev/neo.date'
+import { formatRelative } from "@lpm.dev/neo.date";
 
-const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000)
-formatRelative(twoHoursAgo)
-// => '2 hours ago'
+const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
+formatRelative(twoHoursAgo);
+// => "2 hours ago"
 
-const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000)
-formatRelative(tomorrow)
-// => 'in 1 day'
+const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
+formatRelative(tomorrow);
+// => "in 1 day"
 
 // With locale
-formatRelative(twoHoursAgo, new Date(), { locale: 'es' })
-// => 'hace 2 horas'
+formatRelative(twoHoursAgo, new Date(), { locale: "es" });
+// => "hace 2 horas"
 
 // With style
-formatRelative(twoHoursAgo, new Date(), { style: 'short' })
-// => '2 hr. ago'
+formatRelative(twoHoursAgo, new Date(), { style: "short" });
+// => "2 hr. ago"
 ```
 
 **Parameters:**
-| Parameter | Type | Default | Description |
-|-----------|------|---------|-------------|
-| `date` | `Date` | — | Date to format |
-| `baseDate` | `Date` | `new Date()` | Reference date (defaults to now) |
-| `options.locale` | `string` | `'en-US'` | BCP 47 locale tag, up to 256 characters |
-| `options.style` | `'long' \| 'short' \| 'narrow'` | `'long'` | Output verbosity |
-| `options.numeric` | `'always' \| 'auto'` | `'always'` | Numeric output or words such as `tomorrow` |
+
+| Parameter         | Type                            | Default      | Description                                |
+| ----------------- | ------------------------------- | ------------ | ------------------------------------------ |
+| `date`            | `Date`                          | —            | Date to format                             |
+| `baseDate`        | `Date`                          | `new Date()` | Reference date (defaults to now)           |
+| `options.locale`  | `string`                        | `'en-US'`    | BCP 47 locale tag, up to 256 characters    |
+| `options.style`   | `'long' \| 'short' \| 'narrow'` | `'long'`     | Output verbosity                           |
+| `options.numeric` | `'always' \| 'auto'`            | `'always'`   | Numeric output or words such as `tomorrow` |
 
 ### `parseISO(dateString)`
 
-Parse an ISO 8601 or RFC 3339 date string into a `Date` object.
+Parses an ISO 8601 or RFC 3339 string into a `Date` object.
 
-Supported forms are extended calendar dates (`YYYY-MM-DD`) and date-times with minutes, optional seconds/fraction, and an optional `Z` or `±HH:mm` offset.
+Supported forms are extended calendar dates (`YYYY-MM-DD`) and date-times with
+minutes, optional seconds/fraction, and an optional `Z` or `±HH:mm` offset.
 
 ```typescript
-import { parseISO } from '@lpm.dev/neo.date'
+import { parseISO } from "@lpm.dev/neo.date";
 
-parseISO('2025-01-15T15:30:00.000Z')  // Date object
-parseISO('2025-01-15')                 // Date object (midnight in local time)
-parseISO('2025-01-15T15:30:00-05:00') // Date object (RFC 3339 with offset)
+parseISO("2025-01-15T15:30:00.000Z"); // Date object
+parseISO("2025-01-15"); // Date object (midnight in local time)
+parseISO("2025-01-15T15:30:00-05:00"); // Date object (RFC 3339 with offset)
 
 // Strict validation: non-ISO and impossible calendar values throw
-parseISO('not-a-date')  // RangeError: Invalid ISO date string
-parseISO('2025-02-29')  // RangeError: Invalid ISO date string
+parseISO("not-a-date"); // RangeError: Invalid ISO date string
+parseISO("2025-02-29"); // RangeError: Invalid ISO date string
 ```
+
+Local values use JavaScript-compatible disambiguation. If a daylight-saving
+change removes a local time, `parseISO` advances the value by the gap.
+
+For example, a local midnight can become 01:00 when the timezone starts
+daylight-saving time at midnight.
 
 ### `add(date, duration)`
 
-Add a duration to a date. **Immutable** — returns a new `Date`.
+Adds a duration and returns a new `Date` object.
 
 ```typescript
-import { add } from '@lpm.dev/neo.date'
+import { add } from "@lpm.dev/neo.date";
 
-const date = new Date('2025-01-15')
+const date = new Date("2025-01-15");
 
-add(date, { days: 7 })                  // 2025-01-22
-add(date, { months: 1 })               // 2025-02-15
-add(date, { hours: 2, minutes: 30 })   // 2025-01-15 02:30
-add(date, { years: 1, months: 2, days: 3 }) // 2026-03-18
+add(date, { days: 7 }); // 2025-01-22
+add(date, { months: 1 }); // 2025-02-15
+add(date, { hours: 2, minutes: 30 }); // 2025-01-15 02:30
+add(date, { years: 1, months: 2, days: 3 }); // 2026-03-18
 ```
 
-**Duration fields** (all optional): `years`, `months`, `days`, `hours`, `minutes`, `seconds`, `milliseconds`
+**Duration fields** (all optional): `years`, `months`, `days`, `hours`,
+`minutes`, `seconds`, `milliseconds`
 
-Years and months are clamped to the last valid target day, so January 31 plus one month is February 28 (or 29 in a leap year). Days are local calendar operations that preserve wall-clock time across DST. Hours and smaller units are exact elapsed durations. Duration values must be finite safe integers.
+Years and months stop at the last valid target day. Thus, January 31 plus one
+month is February 28 or 29. Days preserve local wall-clock time across DST.
+Hours and smaller units are exact elapsed durations. Duration values must be
+finite safe integers.
 
 ### `subtract(date, duration)`
 
-Subtract a duration from a date. **Immutable** — returns a new `Date`.
+Subtracts a duration and returns a new `Date` object.
 
 ```typescript
-import { subtract } from '@lpm.dev/neo.date'
+import { subtract } from "@lpm.dev/neo.date";
 
-const date = new Date('2025-01-15')
+const date = new Date("2025-01-15");
 
-subtract(date, { days: 7 })   // 2025-01-08
-subtract(date, { months: 1 }) // 2024-12-15
+subtract(date, { days: 7 }); // 2025-01-08
+subtract(date, { months: 1 }); // 2024-12-15
 ```
 
 ### `startOf(date, unit)`
 
-Get the start of a time unit for a date.
+Returns the start of a time unit.
 
 ```typescript
-import { startOf } from '@lpm.dev/neo.date'
+import { startOf } from "@lpm.dev/neo.date";
 
-const date = new Date('2025-01-15T14:30:45.500')
+const date = new Date("2025-01-15T14:30:45.500");
 
-startOf(date, 'day')    // 2025-01-15T00:00:00.000
-startOf(date, 'month')  // 2025-01-01T00:00:00.000
-startOf(date, 'year')   // 2025-01-01T00:00:00.000
-startOf(date, 'hour')   // 2025-01-15T14:00:00.000
+startOf(date, "day"); // 2025-01-15T00:00:00.000
+startOf(date, "month"); // 2025-01-01T00:00:00.000
+startOf(date, "year"); // 2025-01-01T00:00:00.000
+startOf(date, "hour"); // 2025-01-15T14:00:00.000
 ```
+
+Calendar boundaries use local civil time. Sub-day boundaries stay in the
+UTC-offset occurrence that contains the input. If an offset change splits a
+unit, the boundary stops at the first or last instant of that occurrence.
 
 ### `endOf(date, unit)`
 
-Get the end of a time unit for a date.
+Returns the end of a time unit.
 
 ```typescript
-import { endOf } from '@lpm.dev/neo.date'
+import { endOf } from "@lpm.dev/neo.date";
 
-const date = new Date('2025-01-15T14:30:45.500')
+const date = new Date("2025-01-15T14:30:45.500");
 
-endOf(date, 'day')    // 2025-01-15T23:59:59.999
-endOf(date, 'month')  // 2025-01-31T23:59:59.999
-endOf(date, 'year')   // 2025-12-31T23:59:59.999
+endOf(date, "day"); // 2025-01-15T23:59:59.999
+endOf(date, "month"); // 2025-01-31T23:59:59.999
+endOf(date, "year"); // 2025-12-31T23:59:59.999
 ```
+
+Calendar boundaries use the last instant before the next local unit. This rule
+accounts for repeated times and skipped calendar dates.
 
 ### `diff(dateLeft, dateRight, unit)`
 
-Calculate the signed number of complete units between two dates.
+Returns the signed number of complete units between two dates.
 
 ```typescript
-import { diff } from '@lpm.dev/neo.date'
+import { diff } from "@lpm.dev/neo.date";
 
-const date1 = new Date('2025-01-15')
-const date2 = new Date('2025-01-20')
+const date1 = new Date("2025-01-15");
+const date2 = new Date("2025-01-20");
 
-diff(date2, date1, 'days')         // 5
-diff(date2, date1, 'hours')        // 120
-diff(date1, date2, 'days')         // -5 (negative if left is earlier)
-diff(date2, date1, 'milliseconds') // 432000000
+diff(date2, date1, "days"); // 5
+diff(date2, date1, "hours"); // 120
+diff(date1, date2, "days"); // -5 (negative if left is earlier)
+diff(date2, date1, "milliseconds"); // 432000000
 ```
 
-**Units:** `'years'`, `'months'`, `'days'`, `'hours'`, `'minutes'`, `'seconds'`, `'milliseconds'`
+**Units:** `'years'`, `'months'`, `'days'`, `'hours'`, `'minutes'`, `'seconds'`,
+`'milliseconds'`
 
-Years, months, and days are complete local-calendar units and account for DST. Hours and smaller units are elapsed-time units truncated toward zero.
+Years, months, and days are complete local-calendar units and account for DST.
+Hours and smaller units are elapsed-time units truncated toward zero.
 
-The unit parameter uses the exported `DifferenceUnit` type. `startOf()` and `endOf()` use the singular `BoundaryUnit` type.
+The unit parameter uses the exported `DifferenceUnit` type. `startOf()` and
+`endOf()` use the singular `BoundaryUnit` type.
 
 ### `compare(dateLeft, dateRight)`
 
-Compare two dates. Returns `-1`, `0`, or `1`.
+Compares two dates and returns `-1`, `0`, or `1`.
 
 ```typescript
-import { compare } from '@lpm.dev/neo.date'
+import { compare } from "@lpm.dev/neo.date";
 
-compare(new Date('2025-01-15'), new Date('2025-01-20')) // -1
-compare(new Date('2025-01-20'), new Date('2025-01-15')) //  1
-compare(new Date('2025-01-15'), new Date('2025-01-15')) //  0
+compare(new Date("2025-01-15"), new Date("2025-01-20")); // -1
+compare(new Date("2025-01-20"), new Date("2025-01-15")); //  1
+compare(new Date("2025-01-15"), new Date("2025-01-15")); //  0
 ```
 
 ### `isEqual(dateLeft, dateRight)`
 
 ```typescript
-import { isEqual } from '@lpm.dev/neo.date'
+import { isEqual } from "@lpm.dev/neo.date";
 
-isEqual(new Date('2025-01-15'), new Date('2025-01-15')) // true
-isEqual(new Date('2025-01-15'), new Date('2025-01-16')) // false
+isEqual(new Date("2025-01-15"), new Date("2025-01-15")); // true
+isEqual(new Date("2025-01-15"), new Date("2025-01-16")); // false
 ```
 
 ### `isBefore(date, dateToCompare)` / `isAfter(date, dateToCompare)`
 
 ```typescript
-import { isBefore, isAfter } from '@lpm.dev/neo.date'
+import { isAfter, isBefore } from "@lpm.dev/neo.date";
 
-const earlier = new Date('2025-01-15')
-const later   = new Date('2025-01-20')
+const earlier = new Date("2025-01-15");
+const later = new Date("2025-01-20");
 
-isBefore(earlier, later) // true
-isAfter(later, earlier)  // true
+isBefore(earlier, later); // true
+isAfter(later, earlier); // true
 ```
 
 ### `isValid(date)`
 
 ```typescript
-import { isValid } from '@lpm.dev/neo.date'
+import { isValid } from "@lpm.dev/neo.date";
 
-isValid(new Date())            // true
-isValid(new Date('invalid'))   // false
-isValid(new Date('2025-01-15')) // true
+isValid(new Date()); // true
+isValid(new Date("invalid")); // false
+isValid(new Date("2025-01-15")); // true
 ```
 
-## TypeScript
+## Behavior and limits
+
+- All date operations return new `Date` objects.
+- Duration values must be finite safe integers.
+- Locale tags can contain up to 256 characters.
+- Years, months, and days use local calendar rules. Smaller units use elapsed
+  time.
+- Runtime `Intl` data controls the supported locales, calendars, and time zones.
+
+### TypeScript example
 
 Full type support:
 
@@ -302,16 +338,16 @@ import type {
   ISOFormatOptions,
   RelativeTimeOptions,
   TimeUnit,
-} from '@lpm.dev/neo.date'
+} from "@lpm.dev/neo.date";
 
-const duration: Duration = { days: 7, hours: 2 }
+const duration: Duration = { days: 7, hours: 2 };
 const opts: FormatOptions = {
-  dateStyle: 'medium',
-  locale: 'fr-FR',
-  weekday: 'long',
-}
-const boundary: BoundaryUnit = 'day'
-const difference: DifferenceUnit = 'days'
+  dateStyle: "medium",
+  locale: "fr-FR",
+  weekday: "long",
+};
+const boundary: BoundaryUnit = "day";
+const difference: DifferenceUnit = "days";
 ```
 
 ## Migration from `date-fns`
@@ -330,8 +366,19 @@ const difference: DifferenceUnit = 'days'
 + diff(date2, date1, 'days')
 ```
 
-**Note:** `format()` uses `Intl.DateTimeFormat` options instead of format strings — more powerful for locale support, slightly different syntax.
+`format()` uses `Intl.DateTimeFormat` options instead of date-fns format
+strings.
+
+Run the application tests after the migration.
+
+## Runtime support
+
+- **Node.js:** 18 or later
+- **Browsers:** Modern browsers with `Intl.DateTimeFormat` and
+  `Intl.RelativeTimeFormat`
+- **Module formats:** ESM and CommonJS
+- **TypeScript:** Declaration files included
 
 ## License
 
-MIT
+MIT. See [LICENSE](./LICENSE).

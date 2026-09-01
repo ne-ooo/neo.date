@@ -1,5 +1,6 @@
 import type { ISOFormatOptions } from '../types.js'
 import { getValidDateTime } from '../utils/dateValidation.js'
+import { assertOptionsObject } from '../utils/optionsValidation.js'
 
 /**
  * Format date as ISO 8601 string
@@ -24,17 +25,31 @@ export function formatISO(
   date: Date,
   options: ISOFormatOptions = {}
 ): string {
-  const timestamp = getValidDateTime(date)
-  const { representation = 'complete' } = options
+  getValidDateTime(date)
+  assertOptionsObject(options)
+  const representationValue = Object.hasOwn(options, 'representation')
+    ? options.representation
+    : undefined
+  const representation =
+    representationValue === undefined ? 'complete' : representationValue
 
-  const iso = new Date(timestamp).toISOString()
+  if (
+    representation !== 'complete' &&
+    representation !== 'date' &&
+    representation !== 'time'
+  ) {
+    throw new RangeError('Invalid ISO representation')
+  }
+
+  const iso = Date.prototype.toISOString.call(date)
+  const separatorIndex = iso.indexOf('T')
 
   if (representation === 'date') {
-    return iso.split('T')[0]!
+    return iso.slice(0, separatorIndex)
   }
 
   if (representation === 'time') {
-    return iso.split('T')[1]!
+    return iso.slice(separatorIndex + 1)
   }
 
   return iso

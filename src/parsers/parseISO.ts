@@ -107,15 +107,10 @@ function createLocalDate(
   result.setFullYear(year, month, day)
   result.setHours(hour, minute, second, millisecond)
 
-  if (
-    result.getFullYear() !== year ||
-    result.getMonth() !== month ||
-    result.getDate() !== day ||
-    result.getHours() !== hour ||
-    result.getMinutes() !== minute ||
-    result.getSeconds() !== second ||
-    result.getMilliseconds() !== millisecond
-  ) {
+  // Match the platform's compatible disambiguation for local times in a
+  // daylight-saving gap: advance by the gap instead of rejecting valid ISO
+  // calendar components that have no exact local instant.
+  if (!Number.isFinite(result.getTime())) {
     throw new RangeError('Invalid ISO date string')
   }
 

@@ -31,8 +31,9 @@
     "build": "tsup",
     "prepack": "lpm run build",
     "security:audit": "lpm audit --level high --fail-on vuln",
-    "publish:check": "lpm run security:audit && lpm run test:package && lpm publish --check --yes",
-    "publish:lpm": "lpm run security:audit && lpm run test:package && lpm publish --yes",
+    "security:signatures": "node test/verify-signatures.mjs",
+    "publish:check": "lpm run security:audit && lpm run security:signatures && lpm run test:package && lpm publish --check --yes",
+    "publish:lpm": "lpm run security:audit && lpm run security:signatures && lpm run test:package && lpm publish --yes",
     "test": "vitest run",
     "test:package": "node test/package-smoke.mjs",
     "test:watch": "vitest",
@@ -63,6 +64,9 @@
     "typescript": "^5.3.3",
     "vite": "^6.4.3",
     "vitest": "^3.2.6"
+  },
+  "overrides": {
+    "nanoid": "3.3.18"
   },
   "engines": {
     "node": ">=18.0.0"

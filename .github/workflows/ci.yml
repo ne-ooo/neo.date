@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  LPM_VERSION: "0.74.1"
+  LPM_VERSION: "0.76.5"
 
 jobs:
   node:
@@ -41,13 +41,13 @@ jobs:
         run: lpm ci --no-skills --no-editor-setup --no-security-summary
 
       - name: Typecheck
-        run: npm run typecheck
+        run: lpm run typecheck
 
       - name: Test
-        run: npm test
+        run: lpm run test
 
       - name: Build
-        run: npm run build
+        run: lpm run build
 
   timezone:
     name: TZ ${{ matrix.timezone }}
@@ -81,7 +81,7 @@ jobs:
         run: lpm ci --no-skills --no-editor-setup --no-security-summary
 
       - name: Test timezone behavior
-        run: npm test
+        run: lpm run test
 
   package:
     name: Security and package smoke
@@ -104,10 +104,10 @@ jobs:
         run: lpm ci --no-skills --no-editor-setup --no-security-summary
 
       - name: Audit dependencies
-        run: npm run security:audit
+        run: lpm run security:audit
 
-      - name: Verify dependency signatures
-        run: lpm audit signatures --json
+      - name: Audit dependency signatures
+        run: lpm run security:signatures
 
       - name: Smoke-test packed ESM and CJS consumers
-        run: npm run test:package
+        run: lpm run test:package

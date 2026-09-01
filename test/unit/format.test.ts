@@ -2,6 +2,14 @@ import { describe, it, expect } from 'vitest'
 import { format, formatISO, formatRelative } from '../../src/index.js'
 
 describe('format', () => {
+  it('rejects non-object options at runtime', () => {
+    const date = new Date('2025-01-15T15:30:00.000Z')
+
+    for (const options of ['yyyy-MM-dd', null, []]) {
+      expect(() => format(date, options as never)).toThrow(TypeError)
+    }
+  })
+
   describe('basic formatting', () => {
     it('should format with dateStyle', () => {
       const date = new Date('2025-01-15T15:30:00.000Z')
@@ -113,6 +121,14 @@ describe('format', () => {
 })
 
 describe('formatISO', () => {
+  it('rejects non-object options at runtime', () => {
+    const date = new Date('2025-01-15T15:30:00.000Z')
+
+    for (const options of ['complete', null, []]) {
+      expect(() => formatISO(date, options as never)).toThrow(TypeError)
+    }
+  })
+
   describe('complete format', () => {
     it('should format as complete ISO 8601 string', () => {
       const date = new Date('2025-01-15T15:30:00.000Z')
@@ -150,15 +166,55 @@ describe('formatISO', () => {
       expect(result).toBe('15:30:00.000Z')
     })
   })
+
+  it('supports expanded years in partial representations', () => {
+    const positive = new Date('+010000-01-02T03:04:05.006Z')
+    const negative = new Date('-000001-01-02T03:04:05.006Z')
+
+    expect(formatISO(positive, { representation: 'date' })).toBe(
+      '+010000-01-02'
+    )
+    expect(formatISO(positive, { representation: 'time' })).toBe(
+      '03:04:05.006Z'
+    )
+    expect(formatISO(negative, { representation: 'date' })).toBe(
+      '-000001-01-02'
+    )
+    expect(formatISO(negative, { representation: 'time' })).toBe(
+      '03:04:05.006Z'
+    )
+  })
 })
 
 describe('formatRelative', () => {
+  it('rejects non-object options at runtime', () => {
+    const date = new Date('2025-01-15T15:30:00.000Z')
+
+    for (const options of ['long', null, []]) {
+      expect(() => formatRelative(date, date, options as never)).toThrow(
+        TypeError
+      )
+    }
+  })
+
   it('rejects oversized locales', () => {
     const locale = `en-x-${'a-'.repeat(126)}a`
 
     expect(() =>
       formatRelative(new Date(), new Date(), { locale })
     ).toThrow(RangeError)
+  })
+
+  it('uses native Intl defaults without materializing them', () => {
+    const base = new Date('2025-01-15T00:00:00.000Z')
+    const future = new Date('2025-01-15T01:00:00.000Z')
+
+    expect(formatRelative(future, base)).toBe(
+      formatRelative(future, base, { style: 'long', numeric: 'always' })
+    )
+    expect(formatRelative(future, base, { style: 'short' })).toBe(
+      new Intl.RelativeTimeFormat('en-US', { style: 'short' }).format(1, 'hour')
+    )
   })
 
   describe('past times', () => {

@@ -28,11 +28,10 @@ import { normalizeDuration } from '../utils/duration.js'
 export function add(date: Date, duration: Duration): Date {
   const result = cloneValidDate(date)
   const normalized = normalizeDuration(duration)
-  const calendarMonths = normalized.years * 12 + normalized.months
-
-  if (!Number.isSafeInteger(calendarMonths)) {
-    throw new RangeError('combined years and months exceed the safe integer range')
-  }
+  const calendarMonths = combineCalendarMonths(
+    normalized.years,
+    normalized.months
+  )
 
   if (calendarMonths !== 0) {
     const originalDay = result.getDate()
@@ -40,7 +39,6 @@ export function add(date: Date, duration: Duration): Date {
     const targetYear = result.getFullYear() + Math.floor(targetMonthIndex / 12)
     const targetMonth = ((targetMonthIndex % 12) + 12) % 12
 
-    result.setDate(1)
     result.setFullYear(
       targetYear,
       targetMonth,
@@ -54,19 +52,65 @@ export function add(date: Date, duration: Duration): Date {
     getValidDateTime(result, 'result')
   }
 
-  const elapsedMilliseconds =
-    normalized.hours * 3_600_000 +
-    normalized.minutes * 60_000 +
-    normalized.seconds * 1_000 +
-    normalized.milliseconds
-
-  if (!Number.isSafeInteger(elapsedMilliseconds)) {
-    throw new RangeError('combined sub-day duration exceeds the safe integer range')
-  }
+  const elapsedMilliseconds = combineElapsedMilliseconds(normalized)
 
   if (elapsedMilliseconds === 0) return result
 
   const finalResult = new Date(result.getTime() + elapsedMilliseconds)
   getValidDateTime(finalResult, 'result')
   return finalResult
+}
+
+function combineCalendarMonths(years: number, months: number): number {
+  const scaledYears = years * 12
+  const combined = scaledYears + months
+
+  if (Number.isSafeInteger(scaledYears) && Number.isSafeInteger(combined)) {
+    return combined
+  }
+
+  return toSafeNumber(
+    BigInt(years) * 12n + BigInt(months),
+    'combined years and months exceed the safe integer range'
+  )
+}
+
+function combineElapsedMilliseconds(
+  duration: ReturnType<typeof normalizeDuration>
+): number {
+  const hours = duration.hours * 3_600_000
+  const minutes = duration.minutes * 60_000
+  const seconds = duration.seconds * 1_000
+  const hoursAndMinutes = hours + minutes
+  const throughSeconds = hoursAndMinutes + seconds
+  const combined = throughSeconds + duration.milliseconds
+
+  if (
+    Number.isSafeInteger(hours) &&
+    Number.isSafeInteger(minutes) &&
+    Number.isSafeInteger(seconds) &&
+    Number.isSafeInteger(hoursAndMinutes) &&
+    Number.isSafeInteger(throughSeconds) &&
+    Number.isSafeInteger(combined)
+  ) {
+    return combined
+  }
+
+  return toSafeNumber(
+    BigInt(duration.hours) * 3_600_000n +
+      BigInt(duration.minutes) * 60_000n +
+      BigInt(duration.seconds) * 1_000n +
+      BigInt(duration.milliseconds),
+    'combined sub-day duration exceeds the safe integer range'
+  )
+}
+
+function toSafeNumber(value: bigint, message: string): number {
+  if (
+    value < BigInt(Number.MIN_SAFE_INTEGER) ||
+    value > BigInt(Number.MAX_SAFE_INTEGER)
+  ) {
+    throw new RangeError(message)
+  }
+  return Number(value)
 }

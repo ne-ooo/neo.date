@@ -1,6 +1,7 @@
 import type { FormatOptions } from '../types.js'
 import { getValidDateTime } from '../utils/dateValidation.js'
 import { getDateTimeFormatter } from '../utils/intlFormatters.js'
+import { assertOptionsObject } from '../utils/optionsValidation.js'
 
 /**
  * Format date using Intl.DateTimeFormat
@@ -33,8 +34,12 @@ import { getDateTimeFormatter } from '../utils/intlFormatters.js'
  */
 export function format(date: Date, options: FormatOptions = {}): string {
   const timestamp = getValidDateTime(date)
-  const { locale = 'en-US', ...intlOptions } = options
+  assertOptionsObject(options)
+  const localeValue = Object.hasOwn(options, 'locale')
+    ? options.locale
+    : undefined
+  const locale = localeValue === undefined ? 'en-US' : localeValue
 
-  const formatter = getDateTimeFormatter(locale, intlOptions)
+  const formatter = getDateTimeFormatter(locale, options)
   return formatter.format(timestamp)
 }

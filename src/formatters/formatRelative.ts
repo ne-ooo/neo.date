@@ -1,6 +1,7 @@
 import type { RelativeTimeOptions } from '../types.js'
 import { getValidDateTime } from '../utils/dateValidation.js'
 import { getRelativeTimeFormatter } from '../utils/intlFormatters.js'
+import { assertOptionsObject } from '../utils/optionsValidation.js'
 
 const SECOND = 1_000
 const MINUTE = 60 * SECOND
@@ -43,15 +44,15 @@ export function formatRelative(
   baseDate: Date = new Date(),
   options: RelativeTimeOptions = {}
 ): string {
-  const {
-    locale = 'en-US',
-    style = 'long',
-    numeric = 'always',
-  } = options
+  assertOptionsObject(options)
+  const localeValue = Object.hasOwn(options, 'locale')
+    ? options.locale
+    : undefined
+  const locale = localeValue === undefined ? 'en-US' : localeValue
   const diffMs =
     getValidDateTime(date, 'date') - getValidDateTime(baseDate, 'baseDate')
   const absoluteDifference = Math.abs(diffMs)
-  const rtf = getRelativeTimeFormatter(locale, { style, numeric })
+  const rtf = getRelativeTimeFormatter(locale, options)
 
   if (absoluteDifference < MINUTE) {
     return rtf.format(roundSigned(diffMs / SECOND), 'second')

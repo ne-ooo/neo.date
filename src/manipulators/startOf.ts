@@ -1,4 +1,8 @@
 import type { BoundaryUnit } from '../types.js'
+import {
+  alignSubDayBoundary,
+  getLocalOffsetMilliseconds,
+} from '../utils/boundary.js'
 import { cloneValidDate, getValidDateTime } from '../utils/dateValidation.js'
 
 /**
@@ -40,15 +44,44 @@ export function startOf(
     case 'day':
       result.setHours(0, 0, 0, 0)
       break
-    case 'hour':
+    case 'hour': {
+      const inputTimestamp = result.getTime()
+      const inputOffset = getLocalOffsetMilliseconds(result)
       result.setMinutes(0, 0, 0)
-      break
-    case 'minute':
+      return alignSubDayBoundary(
+        result,
+        inputTimestamp,
+        inputOffset,
+        'hour',
+        'start'
+      )
+    }
+    case 'minute': {
+      const inputTimestamp = result.getTime()
+      const inputOffset = getLocalOffsetMilliseconds(result)
       result.setSeconds(0, 0)
-      break
-    case 'second':
+      return alignSubDayBoundary(
+        result,
+        inputTimestamp,
+        inputOffset,
+        'minute',
+        'start'
+      )
+    }
+    case 'second': {
+      const inputTimestamp = result.getTime()
+      const inputOffset = getLocalOffsetMilliseconds(result)
       result.setMilliseconds(0)
-      break
+      return alignSubDayBoundary(
+        result,
+        inputTimestamp,
+        inputOffset,
+        'second',
+        'start'
+      )
+    }
+    default:
+      throw new RangeError('Invalid boundary unit')
   }
 
   getValidDateTime(result, 'result')

@@ -81,13 +81,26 @@ function differenceInCompleteCalendarUnits(
   const later = sign === 1 ? dateLeft : dateRight
   const earlier = sign === 1 ? dateRight : dateLeft
   let estimate = estimateCalendarUnits(later, earlier, unit)
-  const candidate = addCalendarUnits(earlier, unit, estimate)
 
-  if (candidate.getTime() > later.getTime()) {
+  if (candidateOvershoots(earlier, later, unit, estimate)) {
     estimate -= 1
   }
 
   return estimate === 0 ? 0 : sign * estimate
+}
+
+function candidateOvershoots(
+  earlier: Date,
+  later: Date,
+  unit: 'years' | 'months' | 'days',
+  amount: number
+): boolean {
+  try {
+    return addCalendarUnits(earlier, unit, amount).getTime() > later.getTime()
+  } catch (error) {
+    if (error instanceof RangeError) return true
+    throw error
+  }
 }
 
 function estimateCalendarUnits(

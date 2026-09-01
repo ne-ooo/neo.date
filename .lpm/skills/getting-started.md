@@ -92,6 +92,8 @@ parseISO('')                              // throws Error
 
 `parseISO` validates its grammar and calendar values. Date-only and zone-less inputs use local civil time; `Z` and numeric offsets identify an absolute instant. Invalid values such as `'2025-02-29'` throw `RangeError`.
 
+Local values use JavaScript-compatible disambiguation. If a daylight-saving change removes a local time, `parseISO` advances the value by the gap.
+
 ## Manipulators (Immutable)
 
 All return new Date instances — the original is never mutated.
@@ -126,6 +128,8 @@ endOf(date, 'year')      // 2025-12-31T23:59:59.999
 ```
 
 Units: `'year'`, `'month'`, `'day'`, `'hour'`, `'minute'`, `'second'`.
+
+Calendar boundaries use local civil time. Sub-day boundaries stay in the UTC-offset occurrence that contains the input. If an offset change splits a unit, the boundary stops at the first or last instant of that occurrence.
 
 ## Utilities
 

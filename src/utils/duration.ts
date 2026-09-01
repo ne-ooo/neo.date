@@ -22,18 +22,28 @@ function normalizeField(value: number | undefined, field: string): number {
   return value
 }
 
+function getOwnField(
+  duration: Duration,
+  field: keyof NormalizedDuration
+): number | undefined {
+  return Object.hasOwn(duration, field) ? duration[field] : undefined
+}
+
 export function normalizeDuration(duration: Duration): NormalizedDuration {
   if (duration === null || typeof duration !== 'object') {
     throw new TypeError('duration must be an object')
   }
 
   return {
-    years: normalizeField(duration.years, 'years'),
-    months: normalizeField(duration.months, 'months'),
-    days: normalizeField(duration.days, 'days'),
-    hours: normalizeField(duration.hours, 'hours'),
-    minutes: normalizeField(duration.minutes, 'minutes'),
-    seconds: normalizeField(duration.seconds, 'seconds'),
-    milliseconds: normalizeField(duration.milliseconds, 'milliseconds'),
+    years: normalizeField(getOwnField(duration, 'years'), 'years'),
+    months: normalizeField(getOwnField(duration, 'months'), 'months'),
+    days: normalizeField(getOwnField(duration, 'days'), 'days'),
+    hours: normalizeField(getOwnField(duration, 'hours'), 'hours'),
+    minutes: normalizeField(getOwnField(duration, 'minutes'), 'minutes'),
+    seconds: normalizeField(getOwnField(duration, 'seconds'), 'seconds'),
+    milliseconds: normalizeField(
+      getOwnField(duration, 'milliseconds'),
+      'milliseconds'
+    ),
   }
 }

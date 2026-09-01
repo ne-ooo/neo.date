@@ -64,6 +64,43 @@ describe('Intl formatter caches', () => {
     expect(canonicalize).not.toHaveBeenCalled()
   })
 
+  it('rejects oversized date-time options before formatter construction', () => {
+    const construct = vi.spyOn(Intl, 'DateTimeFormat')
+    const oversized = 'a'.repeat(257)
+
+    for (const key of ['timeZone', 'calendar', 'numberingSystem'] as const) {
+      expect(() =>
+        getDateTimeFormatter('en-US', { [key]: oversized })
+      ).toThrow(RangeError)
+    }
+    expect(construct).not.toHaveBeenCalled()
+  })
+
+  it('rejects oversized relative-time options before formatter construction', () => {
+    const construct = vi.spyOn(Intl, 'RelativeTimeFormat')
+    const oversized = 'a'.repeat(257)
+
+    for (const key of ['style', 'numeric'] as const) {
+      expect(() =>
+        getRelativeTimeFormatter('en-US', {
+          [key]: oversized,
+        } as Intl.RelativeTimeFormatOptions)
+      ).toThrow(RangeError)
+    }
+    expect(construct).not.toHaveBeenCalled()
+  })
+
+  it('does not stringify non-primitive option values', () => {
+    const stringify = vi.fn(() => 'UTC')
+
+    expect(() =>
+      getDateTimeFormatter('en-US', {
+        timeZone: { toString: stringify } as never,
+      })
+    ).toThrow(RangeError)
+    expect(stringify).not.toHaveBeenCalled()
+  })
+
   it('does not reuse an implicit-zone formatter after TZ changes', () => {
     const originalTimeZone = process.env.TZ
 

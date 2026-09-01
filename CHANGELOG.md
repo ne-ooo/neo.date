@@ -9,10 +9,25 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/).
 ### Security
 
 - Reject locale identifiers longer than 256 characters before `Intl` canonicalization to prevent event-loop CPU exhaustion from attacker-controlled input.
+- Ignore inherited duration fields so prototype changes cannot alter date arithmetic.
+- Reject oversized or non-primitive `Intl` option values before formatter construction.
+- Reject invalid runtime values for boundary units, ISO representations, and formatter options.
 
 ### Performance
 
 - Calculate local civil day numbers without temporary `Date` allocations when computing day differences.
+- Remove temporary `Date`, array, and substring allocations from ISO formatting.
+- Reduce allocations on formatter-cache hits with flat keys and option snapshots.
+
+### Fixed
+
+- Use compatible disambiguation for local ISO values in daylight-saving gaps.
+- Preserve the requested wall time when month arithmetic crosses a midnight gap.
+- Keep sub-day boundaries in the UTC-offset occurrence of the input during offset changes.
+- Calculate calendar ends from the next local boundary to support repeated times and skipped dates.
+- Return complete calendar differences at the limits of the JavaScript `Date` range.
+- Combine large, canceling duration fields without numeric precision loss.
+- Format date-only and time-only ISO output correctly for expanded years.
 
 ### Changed
 
